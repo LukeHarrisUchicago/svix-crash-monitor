@@ -23,9 +23,10 @@ description = "From settlement prices to the simple variance swap rate, the risk
 path = "_output/02_svix_and_crash_probability_ipynb.ipynb"
 
 
-# TODO: Register the monitor notebook, `03_daily_monitor_ipynb`, following
-# the two entries above: a name, a description, and the path of the executed
-# notebook that `doit` leaves in `_output/`.
+[notebooks.03_daily_monitor_ipynb]
+name = "The Daily Monitor"
+description = "How the replication becomes a monitor: the daily update that adds one session to the history, the GitHub Actions workflow that runs it every morning, and the page it publishes to GitHub Pages."
+path = "_output/03_daily_monitor_ipynb.ipynb"
 
 
 [notebooks.04_single_name_crash_bounds_ipynb]
@@ -53,13 +54,28 @@ window in the settings again when it changes; `doit latest` pulls the most
 recent session."""
 
 
-# TODO: Register the monitor's history as `[dataframes.svix_monitor_history]`,
-# following the entry above. It is the CSV in `_output/` that
-# `src/monitor.py` writes, and that the deploy workflow keeps on the
-# `monitor-history` branch. Document it: a name, a description, the path,
-# which column holds the date (`date_col`), how it is produced, and what a
-# reader needs to know (`docs`). The chart below refers to this entry by
-# name, so the site does not build until it exists.
+[dataframes.svix_monitor_history]
+name = "SVIX Monitor History"
+description = "One row per session: the 30-day SVIX, the Cboe VIX, and the probabilities of a 20% and a 10% drop in the S&P 500 within a month, computed from E-mini S&P 500 option settlements"
+path = "_output/svix_monitor_history.csv"
+date_col = "date"
+tags = ["Options", "Volatility", "Monitor"]
+pull_method = "Computed by src/monitor.py from the Databento settlements and the FRED series (doit compute_history for the window, doit latest for the most recent session)"
+docs = """The series the monitor's chart plots, one row per session, oldest
+first. For each session `src/monitor.py` builds the smile of the two
+end-of-month E-mini expirations that bracket 30 days, computes SVIX squared
+for each (`svix2_near`, `svix2_far`), and interpolates total variance to a
+constant 30-day horizon (`svix2_30`; `svix_30` is the index in VIX units,
+annualized volatility in percent). The crash probabilities are read from
+the expiration closest to one month (`days_used`): `p_star_20` is the
+risk-neutral probability of a 20% drop, `p_log_20` the log investor's
+(Martin 2017), `p_power_20` the power-utility investor's (Martin and Shi
+2025); `p_star_10` and `p_log_10` are the same for a 10% drop. `rate` is the
+one-month Treasury yield (DGS1MO, decimal), `forward_near` the
+parity-implied price of the underlying future, and `vix` the Cboe VIX close
+from FRED, when available. The file holds derived numbers only, never
+settlement prices. On the live monitor the deploy workflow keeps it on the
+`monitor-history` branch between runs and appends one row each morning."""
 
 
 [charts]
